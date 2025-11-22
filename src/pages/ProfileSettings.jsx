@@ -18,6 +18,7 @@ import {
   getStoredUser,
   isAuthenticated,
   getUsernameFromEmail,
+  getAuthToken,
 } from "../services/authService";
 
 const ProfileSettings = () => {
@@ -43,6 +44,70 @@ const ProfileSettings = () => {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    feedback: [],
+  });
+
+  // Password validation function (same as RegisterForm)
+  const validatePassword = (password, email) => {
+    const errors = [];
+
+    // Check minimum length
+    if (password.length < 8) {
+      errors.push("Password must be at least 8 characters long");
+    }
+
+    // Check for uppercase letter
+    if (!/(?=.*[A-Z])/.test(password)) {
+      errors.push("Password must contain at least one uppercase letter");
+    }
+
+    // Check for lowercase letter
+    if (!/(?=.*[a-z])/.test(password)) {
+      errors.push("Password must contain at least one lowercase letter");
+    }
+
+    // Check for digit
+    if (!/(?=.*\d)/.test(password)) {
+      errors.push("Password must contain at least one number");
+    }
+
+    // Check for special character
+    if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(password)) {
+      errors.push("Password must contain at least one special character");
+    }
+
+    // Check if password contains email
+    if (
+      email &&
+      password.toLowerCase().includes(email.toLowerCase().split("@")[0])
+    ) {
+      errors.push("Password cannot contain your email address");
+    }
+
+    // Check for common weak patterns
+    if (/123456|password|qwerty|abc123/i.test(password)) {
+      errors.push("Password is too common or weak");
+    }
+
+    return errors;
+  };
+
+  // Update password strength as user types
+  useEffect(() => {
+    if (newPassword) {
+      const errors = validatePassword(newPassword, user?.email);
+      const score = Math.max(0, 6 - errors.length); // 0-6 score
+
+      setPasswordStrength({
+        score,
+        feedback: errors,
+      });
+    } else {
+      setPasswordStrength({ score: 0, feedback: [] });
+    }
+  }, [newPassword, user?.email]);
 
   // Load user data on component mount
   useEffect(() => {
@@ -110,8 +175,8 @@ const ProfileSettings = () => {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${getAuthToken()}`,
           },
-          credentials: "include",
           body: JSON.stringify({ fullName, email }),
         }
       );
@@ -133,20 +198,19 @@ const ProfileSettings = () => {
     }
   };
 
-  // Change password handler
+  // Change password handler with strong validation
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setPasswordError("");
     setPasswordSuccess("");
 
-    if (newPassword.length < 6) {
-      setPasswordError("New password must be at least 6 characters");
+    // Validate strong password
+    const passwordErrors = validatePassword(newPassword, user?.email);
+    if (passwordErrors.length > 0) {
+      setPasswordError(passwordErrors[0]); // Show first error
       return;
     }
-    if (!/\d/.test(newPassword)) {
-      setPasswordError("New password must contain at least one number");
-      return;
-    }
+
     if (newPassword !== confirmPassword) {
       setPasswordError("New passwords don't match!");
       return;
@@ -161,8 +225,8 @@ const ProfileSettings = () => {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${getAuthToken()}`,
           },
-          credentials: "include",
           body: JSON.stringify({
             currentPassword,
             newPassword,
@@ -177,6 +241,7 @@ const ProfileSettings = () => {
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
+        setPasswordStrength({ score: 0, feedback: [] });
         setTimeout(() => setPasswordSuccess(""), 3000);
       } else {
         setPasswordError(data.message || "Failed to change password");
@@ -518,7 +583,7 @@ const ProfileSettings = () => {
                       type={showNewPassword ? "text" : "password"}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Min 6 chars with a number"
+                      placeholder="Create strong password"
                       required
                       disabled={passwordLoading}
                       className={`w-full pl-9 sm:pl-10 pr-11 sm:pr-12 py-2.5 sm:py-3 text-sm sm:text-base rounded-xl border transition-all outline-none ${
@@ -541,6 +606,82 @@ const ProfileSettings = () => {
                       )}
                     </button>
                   </div>
+
+                  {/* Password Strength Indicator */}
+                  {newPassword && (
+                    <div className="mt-3 space-y-2">
+                      <div className="flex justify-between items-center text-xs">
+                        <span
+                          className={
+                            darkMode ? "text-gray-400" : "text-gray-600"
+                          }
+                        >
+                          Password strength:
+                        </span>
+                        <span
+                          className={`
+                          font-medium
+                          ${
+                            passwordStrength.score >= 4
+                              ? "text-green-600"
+                              : passwordStrength.score >= 2
+                              ? "text-yellow-600"
+                              : "text-red-600"
+                          }
+                        `}
+                        >
+                          {passwordStrength.score >= 4
+                            ? "Strong"
+                            : passwordStrength.score >= 2
+                            ? "Medium"
+                            : "Weak"}
+                        </span>
+                      </div>
+
+                      {/* Strength Bar */}
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                        <div
+                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                            passwordStrength.score >= 4
+                              ? "bg-green-500"
+                              : passwordStrength.score >= 2
+                              ? "bg-yellow-500"
+                              : "bg-red-500"
+                          }`}
+                          style={{
+                            width: `${(passwordStrength.score / 6) * 100}%`,
+                          }}
+                        ></div>
+                      </div>
+
+                      {/* Password Requirements */}
+                      <div className="text-xs space-y-1">
+                        {[
+                          "8+ characters",
+                          "Uppercase letter",
+                          "Lowercase letter",
+                          "Number",
+                          "Special character",
+                          "Not contain email",
+                        ].map((requirement, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            {passwordStrength.score > index ? (
+                              <CheckCircle className="w-3 h-3 text-green-500" />
+                            ) : (
+                              <AlertCircle className="w-3 h-3 text-gray-400" />
+                            )}
+                            <span
+                              className={
+                                darkMode ? "text-gray-400" : "text-gray-600"
+                              }
+                            >
+                              {requirement}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Confirm Password */}
@@ -592,7 +733,7 @@ const ProfileSettings = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={passwordLoading}
+                  disabled={passwordLoading || passwordStrength.score < 4}
                   className="w-full py-3 sm:py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm sm:text-base font-semibold rounded-xl hover:shadow-xl hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                 >
                   {passwordLoading ? (
