@@ -28,14 +28,17 @@ const AuthSuccess = ({ onLoginSuccess }) => {
         localStorage.setItem("token", token);
 
         // ✅ Fetch user data with the token
-        const response = await fetch("http://localhost:5001/api/auth/me", {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          import.meta.env.VITE_API_URL + "/api/auth/me",
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         const data = await response.json();
 
