@@ -30,7 +30,7 @@ const VerifyEmail = () => {
     }
   }, [token]);
 
-  // Countdown for auto-redirect
+  // Auto-redirect countdown
   useEffect(() => {
     if (status === "success" && countdown > 0) {
       const timer = setTimeout(() => {
@@ -61,7 +61,7 @@ const VerifyEmail = () => {
         setStatus("success");
         setMessage(data.message || "Email verified successfully!");
 
-        // Update localStorage
+        // Update user verification status in localStorage
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
           try {
@@ -90,11 +90,9 @@ const VerifyEmail = () => {
         setMessage(
           data.message || "Verification failed. Token may be expired."
         );
-        // Check if token expired
         if (data.expired) {
           setIsExpired(true);
         }
-        console.error("Verification failed:", data);
       }
     } catch (error) {
       console.error("Verification error:", error);
@@ -108,10 +106,8 @@ const VerifyEmail = () => {
     setResendMessage("");
 
     try {
-      // Try to get token from multiple sources
       let authToken = localStorage.getItem("token");
 
-      // Also check if token is in user object
       if (!authToken) {
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
@@ -149,24 +145,19 @@ const VerifyEmail = () => {
 
       if (response.ok && data.success) {
         setResendMessage(
-          `✅ ${data.message} (${data.remainingAttempts} attempts remaining today)`
+          `${data.message} (${data.remainingAttempts} attempts remaining today)`
         );
         setStatus("resent");
       } else {
         if (response.status === 429) {
-          // Rate limit exceeded
-          if (data.waitTime) {
-            setResendMessage(`⏱️ ${data.message}`);
-          } else if (data.retryAfter) {
-            setResendMessage(`🚫 ${data.message}`);
-          }
+          setResendMessage(data.message);
         } else {
-          setResendMessage(`❌ ${data.message}`);
+          setResendMessage(data.message);
         }
       }
     } catch (error) {
       console.error("Resend error:", error);
-      setResendMessage("❌ Failed to resend verification email");
+      setResendMessage("Failed to resend verification email");
     } finally {
       setResending(false);
     }
@@ -231,7 +222,7 @@ const VerifyEmail = () => {
           {message}
         </p>
 
-        {/* Success Info */}
+        {/* Success State */}
         {status === "success" && (
           <div
             className={`p-4 rounded-lg mb-6 ${
@@ -274,7 +265,7 @@ const VerifyEmail = () => {
           </div>
         )}
 
-        {/* Resent Success Info */}
+        {/* Resent State */}
         {status === "resent" && (
           <div
             className={`p-4 rounded-lg mb-6 ${
@@ -310,7 +301,7 @@ const VerifyEmail = () => {
           </div>
         )}
 
-        {/* Error Info with Resend Option */}
+        {/* Error State */}
         {status === "error" && (
           <div
             className={`p-4 rounded-lg mb-6 ${
@@ -383,7 +374,7 @@ const VerifyEmail = () => {
                 {resendMessage && (
                   <div
                     className={`mt-3 p-3 rounded-lg text-sm ${
-                      resendMessage.startsWith("✅")
+                      resendMessage.includes("remaining")
                         ? darkMode
                           ? "bg-green-900/30 text-green-300"
                           : "bg-green-100 text-green-700"
@@ -400,7 +391,7 @@ const VerifyEmail = () => {
           </div>
         )}
 
-        {/* Action Buttons */}
+        {/* Action Button */}
         {(status === "success" ||
           status === "resent" ||
           (status === "error" && !isExpired)) && (

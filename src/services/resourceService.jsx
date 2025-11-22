@@ -21,9 +21,9 @@ export const uploadResource = async (resourceData) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // ✅ Send token in header
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include", // Keep this for cookies if you use them
+      credentials: "include",
       body: JSON.stringify(resourceData),
     });
 

@@ -36,6 +36,7 @@ const ResourceDetails = () => {
   const location = useLocation();
   const { darkMode } = useTheme();
 
+  // State management for search, filters, and UI
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedYear, setSelectedYear] = useState("All");
   const [selectedResource, setSelectedResource] = useState(null);
@@ -46,7 +47,7 @@ const ResourceDetails = () => {
   const [downloadingId, setDownloadingId] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Get data from navigation state or localStorage
+  // Retrieve resource type, department, and semester from navigation state or localStorage
   const resourceType =
     location.state?.resourceType ||
     localStorage.getItem("currentResourceType") ||
@@ -60,31 +61,34 @@ const ResourceDetails = () => {
     location.state?.semester ||
     JSON.parse(localStorage.getItem("dashboardData"))?.semester;
 
-  // Save current resource type
+  // Persist current resource type in localStorage
   useEffect(() => {
     if (resourceType) {
       localStorage.setItem("currentResourceType", resourceType);
     }
   }, [resourceType]);
 
-  // Fetch resources from database - UPDATED with department filtering
+  // Fetch resources when resource type or year filter changes
   useEffect(() => {
     fetchResources();
   }, [resourceType, selectedYear]);
 
+  /**
+   * Fetches resources from the database with applied filters
+   */
   const fetchResources = async () => {
     setLoading(true);
     setError("");
     try {
-      // Get department name from department object
       const departmentName = department?.name || department || "General";
 
       const filters = {
-        resourceType: resourceType, // Specific resource type (Assignments, Quizzes, etc.)
-        department: departmentName, // Specific department (Computer Science, Business, etc.)
+        resourceType: resourceType,
+        department: departmentName,
         search: searchTerm,
       };
 
+      // Add year filter if not "All"
       if (selectedYear !== "All") {
         filters.year = selectedYear;
       }
@@ -99,12 +103,14 @@ const ResourceDetails = () => {
     }
   };
 
-  // Handle search
+  /**
+   * Handles search functionality
+   */
   const handleSearch = () => {
     fetchResources();
   };
 
-  // Disable body scroll when modal is open
+  // Manage body scroll when modal is open/closed
   useEffect(() => {
     if (showViewModal) {
       document.body.style.overflow = "hidden";
@@ -116,18 +122,22 @@ const ResourceDetails = () => {
     };
   }, [showViewModal]);
 
+  /**
+   * Navigates back to dashboard
+   */
   const handleBack = () => {
     navigate("/dashboard", { state: { department, semester } });
   };
 
+  /**
+   * Handles upload button click with user authentication and validation
+   */
   const handleUploadClick = () => {
-    // Check if user is logged in
     if (!isAuthenticated()) {
       alert("Please login to upload resources");
       return;
     }
 
-    // Check if user is verified
     const user = getStoredUser();
     if (!user?.isVerified) {
       alert(
@@ -136,7 +146,7 @@ const ResourceDetails = () => {
       return;
     }
 
-    // Validate that we have department and semester
+    // Validate required department and semester selection
     if (!department) {
       alert("Please select a department first");
       navigate("/select-department");
@@ -149,16 +159,19 @@ const ResourceDetails = () => {
       return;
     }
 
-    // Navigate to upload modal with all required data
+    // Navigate to upload modal with required data
     navigate("/upload-modal", {
       state: {
         resourceType: resourceType || "Resource",
-        department: department.name || department, // Handle both object and string
-        semester: semester, // Remove the "N/A" fallback since we validated it exists
+        department: department.name || department,
+        semester: semester,
       },
     });
   };
 
+  /**
+   * Navigates to user's posts page
+   */
   const handleMyPostsClick = () => {
     if (!isAuthenticated()) {
       alert("Please login to view your posts");
@@ -167,14 +180,17 @@ const ResourceDetails = () => {
     navigate("/my-posts", { state: { resourceType, department } });
   };
 
+  /**
+   * Handles file download with download count increment
+   */
   const handleDownload = async (item) => {
     try {
       setDownloadingId(item._id);
 
-      // Increment download count first
+      // Increment download count in database
       await incrementDownload(item._id);
 
-      // Use the downloadFile function from supabaseStorage
+      // Download file using storage service
       const result = await downloadFile(
         item.fileUrl,
         item.fileName || `${item.title}.pdf`
@@ -184,13 +200,13 @@ const ResourceDetails = () => {
         throw new Error(result.error || "Failed to download file");
       }
 
-      // Refresh to show updated count
+      // Refresh resources to show updated download count
       fetchResources();
     } catch (error) {
       console.error("Download error:", error);
       setError("Failed to download file. Please try again.");
 
-      // Fallback: Try direct download approach
+      // Fallback to direct download if primary method fails
       try {
         const downloadUrl = getDownloadUrl(item.fileUrl);
         const link = document.createElement("a");
@@ -201,7 +217,6 @@ const ResourceDetails = () => {
         link.click();
         document.body.removeChild(link);
 
-        // If we reach here, fallback worked
         setError("");
       } catch (fallbackError) {
         console.error("Fallback download also failed:", fallbackError);
@@ -212,13 +227,15 @@ const ResourceDetails = () => {
     }
   };
 
+  /**
+   * Handles resource viewing with view count increment
+   */
   const handleView = async (item) => {
     try {
-      // Increment view count
       await incrementView(item._id);
       setSelectedResource(item);
       setShowViewModal(true);
-      setIsFullscreen(false); // Reset fullscreen state
+      setIsFullscreen(false);
       fetchResources(); // Refresh to show updated view count
     } catch (error) {
       console.error("View error:", error);
@@ -228,28 +245,40 @@ const ResourceDetails = () => {
     }
   };
 
+  /**
+   * Opens resource preview in new tab
+   */
   const handleOpenPreview = (fileUrl) => {
-    // Open PDF in new tab for preview using the preview URL
     const previewUrl = getPreviewUrl(fileUrl);
     window.open(previewUrl, "_blank");
   };
 
+  /**
+   * Closes the view modal and resets state
+   */
   const handleCloseModal = () => {
     setShowViewModal(false);
     setSelectedResource(null);
     setIsFullscreen(false);
   };
 
+  /**
+   * Handles modal backdrop click to close modal
+   */
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       handleCloseModal();
     }
   };
 
+  /**
+   * Toggles fullscreen mode for the modal
+   */
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
   };
 
+  // Add escape key listener for modal navigation
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape") {
@@ -270,7 +299,7 @@ const ResourceDetails = () => {
     };
   }, [showViewModal, isFullscreen]);
 
-  // Get available years from resources
+  // Extract available years from resources for filter dropdown
   const years = ["All", ...Object.keys(resources).sort((a, b) => b - a)];
 
   return (
@@ -280,7 +309,7 @@ const ResourceDetails = () => {
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Header */}
+        {/* Header with navigation and action buttons */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
           <button
             onClick={handleBack}
@@ -313,7 +342,7 @@ const ResourceDetails = () => {
           </div>
         </div>
 
-        {/* Page Title */}
+        {/* Page title and description */}
         <div className="text-center mb-8">
           <h1
             className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-2 ${
@@ -333,7 +362,7 @@ const ResourceDetails = () => {
           </p>
         </div>
 
-        {/* Search and Filter Section */}
+        {/* Search and filter section */}
         <div
           className={`p-4 sm:p-6 rounded-2xl mb-8 ${
             darkMode
@@ -397,14 +426,14 @@ const ResourceDetails = () => {
           </div>
         </div>
 
-        {/* Loading State */}
+        {/* Loading state */}
         {loading && (
           <div className="flex justify-center items-center py-20">
             <Loader className="w-8 h-8 animate-spin text-blue-600" />
           </div>
         )}
 
-        {/* Error State */}
+        {/* Error state */}
         {error && (
           <div className="p-4 sm:p-6 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 mb-8">
             <p className="text-red-600 dark:text-red-400 text-sm sm:text-base">
@@ -419,7 +448,7 @@ const ResourceDetails = () => {
           </div>
         )}
 
-        {/* Resources List */}
+        {/* Resources list */}
         {!loading && !error && (
           <div className="space-y-6 sm:space-y-8">
             {Object.keys(resources).length > 0 ? (
@@ -516,6 +545,7 @@ const ResourceDetails = () => {
                             </div>
                           </div>
 
+                          {/* Resource metadata */}
                           <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm mt-4">
                             <div className="flex items-center space-x-1 sm:space-x-2">
                               <User
@@ -625,7 +655,7 @@ const ResourceDetails = () => {
         )}
       </div>
 
-      {/* View Resource Modal */}
+      {/* Resource View Modal */}
       {showViewModal && selectedResource && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
@@ -708,7 +738,7 @@ const ResourceDetails = () => {
                   isFullscreen ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"
                 }`}
               >
-                {/* Left Column - Preview */}
+                {/* Preview Section */}
                 <div>
                   <h3
                     className={`text-lg sm:text-xl font-semibold mb-3 sm:mb-4 ${
@@ -824,7 +854,7 @@ const ResourceDetails = () => {
                   </div>
                 </div>
 
-                {/* Right Column - Details */}
+                {/* Details Section */}
                 <div>
                   <h3
                     className={`text-lg sm:text-xl font-semibold mb-3 sm:mb-4 ${

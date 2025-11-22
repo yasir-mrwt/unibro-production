@@ -114,7 +114,7 @@ const DepartmentSelection = () => {
       id: department.id,
       name: department.name,
       tagline: department.tagline,
-      icon: department.icon, // Pass icon name instead of JSX
+      icon: department.icon,
       color: department.color,
     };
 

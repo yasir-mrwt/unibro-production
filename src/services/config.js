@@ -1,4 +1,3 @@
-// src/config.js
 export const API_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:5001" // For local development
@@ -6,5 +5,5 @@ export const API_URL =
 
 export const FRONTEND_URL =
   window.location.hostname === "localhost"
-    ? "http://localhost:5173" // Your local frontend
-    : window.location.origin; // Your deployed frontend URL
+    ? "http://localhost:5173"
+    : window.location.origin;

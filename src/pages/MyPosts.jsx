@@ -35,7 +35,7 @@ const MyPosts = () => {
   const [error, setError] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(null);
 
-  // confirmation modal states
+  // Delete confirmation modal state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [confirmInput, setConfirmInput] = useState("");
@@ -74,7 +74,7 @@ const MyPosts = () => {
   };
 
   const handleDelete = async (item) => {
-    // 🔹 Auto-delete rejected posts
+    // Auto-delete rejected posts
     if (item.status === "rejected") {
       setDeleteLoading(item._id);
       try {
@@ -88,7 +88,7 @@ const MyPosts = () => {
       return;
     }
 
-    // 🔹 For pending or approved → show confirmation modal
+    // Show confirmation modal for pending/approved posts
     setDeleteTarget(item);
     setConfirmInput("");
     setConfirmError("");
@@ -106,7 +106,6 @@ const MyPosts = () => {
     setConfirmed(true);
     setDeleteLoading(deleteTarget._id);
 
-    // small delay for feedback
     setTimeout(async () => {
       try {
         await deleteResource(deleteTarget._id);
@@ -211,7 +210,7 @@ const MyPosts = () => {
           <div className="hidden sm:block w-32"></div>
         </div>
 
-        {/* Tabs */}
+        {/* Navigation Tabs */}
         <div
           className={`p-2 rounded-xl mb-8 ${
             darkMode ? "bg-gray-800" : "bg-white"
@@ -247,21 +246,21 @@ const MyPosts = () => {
           </div>
         </div>
 
-        {/* Loading */}
+        {/* Loading State */}
         {loading && (
           <div className="flex justify-center items-center py-20">
             <Loader className="w-8 h-8 animate-spin text-blue-600" />
           </div>
         )}
 
-        {/* Error */}
+        {/* Error State */}
         {error && (
           <div className="p-6 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 mb-8">
             <p className="text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
 
-        {/* Resources */}
+        {/* Resources List */}
         {!loading && !error && (
           <div className="space-y-6">
             {currentResources.length > 0 ? (
@@ -310,6 +309,7 @@ const MyPosts = () => {
                         {item.description}
                       </p>
 
+                      {/* Rejection Reason */}
                       {item.status === "rejected" && item.rejectionReason && (
                         <div
                           className={`p-4 rounded-lg mb-4 ${
@@ -343,6 +343,7 @@ const MyPosts = () => {
                       )}
                     </div>
 
+                    {/* Delete Button */}
                     <button
                       onClick={() => handleDelete(item)}
                       disabled={deleteLoading === item._id}
@@ -365,7 +366,7 @@ const MyPosts = () => {
                     </button>
                   </div>
 
-                  {/* Footer Info */}
+                  {/* Resource Metadata */}
                   <div className="flex flex-wrap gap-4 text-sm">
                     <div className="flex items-center space-x-2">
                       <User
@@ -451,7 +452,6 @@ const MyPosts = () => {
                     >
                       👁️ {item.viewCount} views
                     </span>
-
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
                         darkMode
@@ -494,7 +494,7 @@ const MyPosts = () => {
           </div>
         )}
 
-        {/* 🔹 Delete Confirmation Modal */}
+        {/* Delete Confirmation Modal */}
         {showDeleteConfirm && deleteTarget && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"

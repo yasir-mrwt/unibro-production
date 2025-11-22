@@ -7,7 +7,7 @@ class SocketService {
     this.socket = null;
     this.connected = false;
     this.currentRoom = null;
-    this.listeners = new Map(); // Track listeners per event
+    this.listeners = new Map();
   }
 
   // Connect to socket server
@@ -47,13 +47,12 @@ class SocketService {
   // Join a chat room
   joinRoom(department, semester, userId, userName) {
     if (!this.socket) {
-      console.error("❌ Socket not connected");
+      console.error("Socket not connected");
       return;
     }
 
     const roomId = `${department}_${semester}`;
 
-    // Don't rejoin if already in this room
     if (this.currentRoom === roomId) {
       return;
     }
@@ -127,28 +126,25 @@ class SocketService {
     }
   }
 
-  // ✅ FIXED: Add listener with automatic deduplication
+  // Add listener with deduplication
   addListener(event, callback) {
     if (!this.socket) return;
 
-    // Get existing listeners for this event
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
 
     const eventListeners = this.listeners.get(event);
 
-    // Check if callback already registered
     if (eventListeners.has(callback)) {
       return;
     }
 
-    // Add new listener
     this.socket.on(event, callback);
     eventListeners.add(callback);
   }
 
-  // ✅ FIXED: Remove specific listener
+  // Remove specific listener
   removeListener(event, callback) {
     if (!this.socket) return;
 
@@ -159,13 +155,7 @@ class SocketService {
     }
   }
 
-  // ✅ FIXED: Remove all listeners for specific component
-  removeListenersForComponent(componentId) {
-    // This would require tracking which component owns which listener
-    // For now, we'll keep global listeners since both components need them
-  }
-
-  // Listen for events (wrapper methods)
+  // Event listener wrappers
   onReceiveMessage(callback) {
     this.addListener("receive_message", callback);
   }
@@ -198,7 +188,7 @@ class SocketService {
     this.addListener("error", callback);
   }
 
-  // ⚠️ DANGEROUS: Only use when truly needed (logout, user switch)
+  // Remove all listeners (use carefully)
   removeAllListeners() {
     if (this.socket) {
       this.socket.removeAllListeners();
@@ -206,7 +196,7 @@ class SocketService {
     }
   }
 
-  // Disconnect socket (use only on logout)
+  // Disconnect socket
   disconnect() {
     if (this.socket) {
       this.removeAllListeners();
@@ -217,16 +207,14 @@ class SocketService {
     }
   }
 
-  // Check if connected
+  // Check connection status
   isConnected() {
     return this.connected && this.socket?.connected;
   }
 
-  // Get current room
   getCurrentRoom() {
     return this.currentRoom;
   }
 }
 
-// Export singleton instance
 export default new SocketService();

@@ -21,12 +21,10 @@ const UploadModal = () => {
   const { darkMode } = useTheme();
   const fileInputRef = useRef(null);
 
-  // Get resourceType from navigation - must match enum values
   const resourceType = location.state?.resourceType || "Notes";
   const department = location.state?.department || "General";
   const semester = location.state?.semester || "N/A";
 
-  // Validate resourceType matches allowed enum values
   const validResourceTypes = [
     "Assignments",
     "Quizzes",
@@ -36,10 +34,9 @@ const UploadModal = () => {
     "Past Papers",
   ];
 
-  // If invalid resourceType, redirect back to dashboard
   React.useEffect(() => {
     if (!validResourceTypes.includes(resourceType)) {
-      console.error(`❌ Invalid resourceType: ${resourceType}`);
+      console.error(`Invalid resourceType: ${resourceType}`);
       navigate("/dashboard");
     }
   }, [resourceType, navigate]);
@@ -82,18 +79,14 @@ const UploadModal = () => {
     });
   };
 
-  // Handle file validation and selection
   const handleFileSelect = (file) => {
-    // Validate file size (max 50MB)
-    const maxSize = 50 * 1024 * 1024; // 50MB
+    const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
       setError("File size must be less than 50MB");
       return false;
     }
 
-    // Validate file type (allow all common document types)
     const allowedTypes = [
-      // Documents
       "application/pdf",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -102,13 +95,11 @@ const UploadModal = () => {
       "application/vnd.ms-excel",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "text/plain",
-      // Images
       "image/jpeg",
       "image/jpg",
       "image/png",
       "image/gif",
       "image/webp",
-      // Archives
       "application/zip",
       "application/x-rar-compressed",
       "application/x-7z-compressed",
@@ -147,7 +138,6 @@ const UploadModal = () => {
     }
   };
 
-  // Drag and drop handlers
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -168,7 +158,6 @@ const UploadModal = () => {
     }
   };
 
-  // Remove selected file
   const handleRemoveFile = () => {
     setSelectedFile(null);
     setUploadForm((prev) => ({
@@ -179,7 +168,6 @@ const UploadModal = () => {
     }));
   };
 
-  // Trigger file input click
   const handleBrowseClick = () => {
     fileInputRef.current?.click();
   };
@@ -188,7 +176,6 @@ const UploadModal = () => {
     e.preventDefault();
     setError("");
 
-    // Manual validation instead of HTML5 validation
     if (!selectedFile) {
       setError("Please select a file to upload");
       return;
@@ -209,7 +196,6 @@ const UploadModal = () => {
     setUploadProgress(0);
 
     try {
-      // Step 1: Upload file to Supabase
       setUploadProgress(20);
       const folderName = resourceType.toLowerCase().replace(/\s+/g, "-");
       const uploadResult = await uploadFileToSupabase(selectedFile, folderName);
@@ -220,14 +206,13 @@ const UploadModal = () => {
 
       setUploadProgress(60);
 
-      // Step 2: Prepare resource data with Supabase URL
       const resourceData = {
         ...uploadForm,
         fileUrl: uploadResult.fileUrl,
         fileName: uploadResult.fileName,
         fileSize: uploadResult.fileSize,
         fileType: uploadResult.fileType,
-        storagePath: uploadResult.storagePath, // Add storage path for deletion
+        storagePath: uploadResult.storagePath,
         resourceType,
         department: department.name || department,
         semester: semester,
@@ -237,14 +222,12 @@ const UploadModal = () => {
 
       setUploadProgress(80);
 
-      // Step 3: Save resource to database
       const response = await uploadResource(resourceData);
 
       if (response.success) {
         setUploadProgress(100);
         setSuccess(true);
 
-        // Redirect after 2 seconds
         setTimeout(() => {
           navigate("/my-posts", {
             state: {
@@ -263,7 +246,6 @@ const UploadModal = () => {
     }
   };
 
-  // Get file icon based on type
   const getFileIcon = () => {
     if (!selectedFile) return <File className="w-8 h-8" />;
 
@@ -285,7 +267,6 @@ const UploadModal = () => {
     return <File className="w-8 h-8 text-gray-500" />;
   };
 
-  // If user is not verified
   if (!user?.isVerified) {
     return (
       <div
@@ -322,7 +303,6 @@ const UploadModal = () => {
     );
   }
 
-  // If successfully uploaded
   if (success) {
     const isAdmin = user?.role === "admin";
 
@@ -397,7 +377,7 @@ const UploadModal = () => {
           </button>
         </div>
 
-        {/* Department & Semester Info */}
+        {/* Course Information */}
         <div
           className={`p-4 sm:p-6 rounded-2xl mb-6 sm:mb-8 ${
             darkMode
@@ -689,7 +669,6 @@ const UploadModal = () => {
                   File * (Max 50MB)
                 </label>
 
-                {/* Hidden file input - REMOVED required attribute */}
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -700,7 +679,6 @@ const UploadModal = () => {
                   className="hidden"
                 />
 
-                {/* Drag & Drop Area */}
                 {!selectedFile ? (
                   <div
                     className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer transition-all ${
@@ -746,7 +724,6 @@ const UploadModal = () => {
                     </p>
                   </div>
                 ) : (
-                  /* Selected File Display */
                   <div
                     className={`border rounded-lg p-3 sm:p-4 ${
                       darkMode

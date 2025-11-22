@@ -30,6 +30,70 @@ const RegisterForm = ({
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    feedback: [],
+  });
+
+  // Password validation function
+  const validatePassword = (password, email) => {
+    const errors = [];
+
+    // Check minimum length
+    if (password.length < 8) {
+      errors.push("Password must be at least 8 characters long");
+    }
+
+    // Check for uppercase letter
+    if (!/(?=.*[A-Z])/.test(password)) {
+      errors.push("Password must contain at least one uppercase letter");
+    }
+
+    // Check for lowercase letter
+    if (!/(?=.*[a-z])/.test(password)) {
+      errors.push("Password must contain at least one lowercase letter");
+    }
+
+    // Check for digit
+    if (!/(?=.*\d)/.test(password)) {
+      errors.push("Password must contain at least one number");
+    }
+
+    // Check for special character
+    if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(password)) {
+      errors.push("Password must contain at least one special character");
+    }
+
+    // Check if password contains email
+    if (
+      email &&
+      password.toLowerCase().includes(email.toLowerCase().split("@")[0])
+    ) {
+      errors.push("Password cannot contain your email address");
+    }
+
+    // Check for common weak patterns
+    if (/123456|password|qwerty|abc123/i.test(password)) {
+      errors.push("Password is too common or weak");
+    }
+
+    return errors;
+  };
+
+  // Update password strength as user types
+  useEffect(() => {
+    if (password) {
+      const errors = validatePassword(password, email);
+      const score = Math.max(0, 6 - errors.length); // 0-6 score
+
+      setPasswordStrength({
+        score,
+        feedback: errors,
+      });
+    } else {
+      setPasswordStrength({ score: 0, feedback: [] });
+    }
+  }, [password, email]);
 
   // Close on escape key and disable scroll
   useEffect(() => {
@@ -51,8 +115,14 @@ const RegisterForm = ({
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
+      setFullName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setAgreeTerms(false);
       setError("");
       setSuccess("");
+      setPasswordStrength({ score: 0, feedback: [] });
     }
   }, [isOpen]);
 
@@ -67,14 +137,15 @@ const RegisterForm = ({
       return;
     }
 
-    // Validate password strength
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
+    // Validate strong password
+    const passwordErrors = validatePassword(password, email);
+    if (passwordErrors.length > 0) {
+      setError(passwordErrors[0]); // Show first error
       return;
     }
 
-    if (!/\d/.test(password)) {
-      setError("Password must contain at least one number");
+    if (!agreeTerms) {
+      setError("You must agree to the Terms and Privacy Policy");
       return;
     }
 
@@ -123,7 +194,7 @@ const RegisterForm = ({
       onClick={handleBackdropClick}
     >
       <div
-        className={`relative w-full max-w-sm rounded-xl shadow-xl ${
+        className={`relative w-full max-w-md rounded-xl shadow-xl ${
           darkMode ? "bg-gray-800" : "bg-white"
         } transform transition-all max-h-[90vh] overflow-y-auto`}
       >
@@ -159,7 +230,7 @@ const RegisterForm = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-6 pb-6">
-          <div className="space-y-3">
+          <div className="space-y-4">
             {/* Error Message */}
             {error && (
               <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-start gap-2">
@@ -261,7 +332,7 @@ const RegisterForm = ({
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min 6 chars with a number"
+                  placeholder="Create strong password"
                   required
                   disabled={loading || success}
                   className={`w-full pl-9 pr-9 py-2.5 text-sm rounded-lg border transition-all outline-none ${
@@ -285,6 +356,80 @@ const RegisterForm = ({
                   )}
                 </button>
               </div>
+
+              {/* Password Strength Indicator */}
+              {password && (
+                <div className="mt-2 space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span
+                      className={darkMode ? "text-gray-400" : "text-gray-600"}
+                    >
+                      Password strength:
+                    </span>
+                    <span
+                      className={`
+                      font-medium
+                      ${
+                        passwordStrength.score >= 4
+                          ? "text-green-600"
+                          : passwordStrength.score >= 2
+                          ? "text-yellow-600"
+                          : "text-red-600"
+                      }
+                    `}
+                    >
+                      {passwordStrength.score >= 4
+                        ? "Strong"
+                        : passwordStrength.score >= 2
+                        ? "Medium"
+                        : "Weak"}
+                    </span>
+                  </div>
+
+                  {/* Strength Bar */}
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                    <div
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        passwordStrength.score >= 4
+                          ? "bg-green-500"
+                          : passwordStrength.score >= 2
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
+                      }`}
+                      style={{
+                        width: `${(passwordStrength.score / 6) * 100}%`,
+                      }}
+                    ></div>
+                  </div>
+
+                  {/* Password Requirements */}
+                  <div className="text-xs space-y-1">
+                    {[
+                      "8+ characters",
+                      "Uppercase letter",
+                      "Lowercase letter",
+                      "Number",
+                      "Special character",
+                      "Not contain email",
+                    ].map((requirement, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        {passwordStrength.score > index ? (
+                          <CheckCircle className="w-3 h-3 text-green-500" />
+                        ) : (
+                          <AlertCircle className="w-3 h-3 text-gray-400" />
+                        )}
+                        <span
+                          className={
+                            darkMode ? "text-gray-400" : "text-gray-600"
+                          }
+                        >
+                          {requirement}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Confirm Password Input */}
@@ -306,7 +451,7 @@ const RegisterForm = ({
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm password"
+                  placeholder="Confirm your password"
                   required
                   disabled={loading || success}
                   className={`w-full pl-9 pr-9 py-2.5 text-sm rounded-lg border transition-all outline-none ${
@@ -367,7 +512,7 @@ const RegisterForm = ({
             {/* Register Button */}
             <button
               type="submit"
-              disabled={loading || success}
+              disabled={loading || success || passwordStrength.score < 4}
               className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
             >
               {loading ? (

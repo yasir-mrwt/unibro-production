@@ -5,10 +5,8 @@ import { getStoredUser } from "../../services/authService";
 const ChatMessage = React.memo(({ message, darkMode, onDelete, onReply }) => {
   const [showActions, setShowActions] = useState(false);
 
-  // ✅ OPTIMIZED: Only get user once with useMemo
   const currentUser = useMemo(() => getStoredUser(), []);
 
-  // ✅ FIX: Comprehensive null checks
   const getUserId = (userId) => {
     if (!userId) return null;
     return typeof userId === "object" ? userId._id : userId;
@@ -77,7 +75,6 @@ const ChatMessage = React.memo(({ message, darkMode, onDelete, onReply }) => {
     }
   };
 
-  // ✅ FIX: Don't render if message data is invalid
   if (!message || !message.message) {
     console.warn("Invalid message data:", message);
     return null;

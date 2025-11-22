@@ -1,10 +1,9 @@
-// API Base URL
 const API_URL = import.meta.env.VITE_API_URL + "/api/auth";
 
-// ✅ Cache for user data to prevent repeated parsing
+// Cache for user data
 let cachedUser = null;
 let lastUserCheck = 0;
-const USER_CACHE_DURATION = 1000; // Cache for 1 second
+const USER_CACHE_DURATION = 1000;
 
 // Register user
 export const register = async (userData) => {
@@ -77,32 +76,30 @@ export const login = async (email, password, rememberMe = false) => {
 // Logout user
 export const logout = async () => {
   try {
-    const token = getStoredToken(); // ✅ Get the token properly
+    const token = getStoredToken();
 
     const response = await fetch(`${API_URL}/logout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // ✅ Add authorization header
+        Authorization: `Bearer ${token}`,
       },
       credentials: "include",
     });
 
     const data = await response.json();
 
-    // Clear local storage regardless of API response
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    cachedUser = null; // ✅ Clear cache
+    cachedUser = null;
 
     return { success: true };
   } catch (error) {
-    console.error("❌ Logout error:", error);
-    // Still clear local data on error
+    console.error("Logout error:", error);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    cachedUser = null; // ✅ Clear cache
-    return { success: true }; // Consider it successful for UX
+    cachedUser = null;
+    return { success: true };
   }
 };
 
@@ -208,7 +205,7 @@ export const resendVerificationEmail = async () => {
 
     return data;
   } catch (error) {
-    console.error("❌ Resend verification error:", error);
+    console.error("Resend verification error:", error);
     throw error;
   }
 };
@@ -220,11 +217,10 @@ export const isAuthenticated = () => {
   return !!(user && token);
 };
 
-// ✅ OPTIMIZED: Get stored user with caching
+// Get stored user with caching
 export const getStoredUser = () => {
   const now = Date.now();
 
-  // Return cached user if still valid
   if (cachedUser && now - lastUserCheck < USER_CACHE_DURATION) {
     return cachedUser;
   }
@@ -238,7 +234,7 @@ export const getStoredUser = () => {
       return parsed;
     }
   } catch (error) {
-    console.error("❌ Error parsing user from localStorage:", error);
+    console.error("Error parsing user from localStorage:", error);
   }
 
   cachedUser = null;
@@ -246,7 +242,7 @@ export const getStoredUser = () => {
   return null;
 };
 
-// Get stored token from multiple sources
+// Get stored token
 export const getStoredToken = () => {
   let token = localStorage.getItem("token");
 
@@ -257,7 +253,7 @@ export const getStoredToken = () => {
         const user = JSON.parse(storedUser);
         token = user.token;
       } catch (e) {
-        console.error("❌ Error parsing user for token:", e);
+        console.error("Error parsing user for token:", e);
       }
     }
   }
@@ -271,7 +267,7 @@ export const getUsernameFromEmail = (email) => {
   return email.split("@")[0];
 };
 
-// Get auth token (used by chat services)
+// Get auth token for API calls
 export const getAuthToken = () => {
   return getStoredToken();
 };
@@ -293,7 +289,7 @@ export const updateStoredUser = (updates) => {
   return null;
 };
 
-// Store auth data (called after login/register)
+// Store auth data after login/register
 export const storeAuthData = (userData) => {
   if (userData.token) {
     localStorage.setItem("token", userData.token);
@@ -304,14 +300,14 @@ export const storeAuthData = (userData) => {
       token: userData.token || userData.user.token,
     };
     localStorage.setItem("user", JSON.stringify(userWithToken));
-    cachedUser = userWithToken; // ✅ Update cache
+    cachedUser = userWithToken;
   } else {
     localStorage.setItem("user", JSON.stringify(userData));
-    cachedUser = userData; // ✅ Update cache
+    cachedUser = userData;
   }
 };
 
-// Clear auth data (called on logout)
+// Clear auth data on logout
 export const clearAuthData = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");

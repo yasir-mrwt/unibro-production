@@ -21,8 +21,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { useTheme } from "../ThemeContext";
-// ... your other imports
-import "../styles/aboutPage.css"; // Add this import
+import "../styles/aboutPage.css";
 
 const AboutPage = () => {
   const { darkMode } = useTheme();

@@ -12,8 +12,6 @@ import {
   CheckCircle,
   AlertCircle,
   Loader,
-  LogOut,
-  Settings,
 } from "lucide-react";
 import { useTheme } from "../components/ThemeContext";
 import {
@@ -28,14 +26,14 @@ const ProfileSettings = () => {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("profile");
 
-  // Profile form
+  // Profile form state
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState("");
   const [profileError, setProfileError] = useState("");
 
-  // Password form
+  // Password form state
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -46,7 +44,7 @@ const ProfileSettings = () => {
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  // Initial load
+  // Load user data on component mount
   useEffect(() => {
     if (!isAuthenticated()) {
       navigate("/");
@@ -59,7 +57,7 @@ const ProfileSettings = () => {
     setEmail(userData?.email || "");
   }, [navigate]);
 
-  // Real-time user data updates
+  // Listen for user data updates
   useEffect(() => {
     const handleUserVerified = () => {
       const updatedUser = getStoredUser();
@@ -98,6 +96,7 @@ const ProfileSettings = () => {
     };
   }, [user]);
 
+  // Update profile handler
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setProfileError("");
@@ -134,12 +133,12 @@ const ProfileSettings = () => {
     }
   };
 
+  // Change password handler
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setPasswordError("");
     setPasswordSuccess("");
 
-    // Validate
     if (newPassword.length < 6) {
       setPasswordError("New password must be at least 6 characters");
       return;
@@ -239,7 +238,7 @@ const ProfileSettings = () => {
                 {user.email}
               </p>
 
-              {/* Badges */}
+              {/* Status Badges */}
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 {user.isVerified ? (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium">
@@ -266,7 +265,7 @@ const ProfileSettings = () => {
             darkMode ? "bg-gray-800" : "bg-white"
           }`}
         >
-          {/* Tabs - Mobile Friendly */}
+          {/* Navigation Tabs */}
           <div className="flex border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setActiveTab("profile")}
@@ -302,26 +301,19 @@ const ProfileSettings = () => {
 
           {/* Tab Content */}
           <div className="p-4 sm:p-6 lg:p-8">
-            {/* Profile Tab */}
+            {/* Profile Settings */}
             {activeTab === "profile" && (
               <form
                 onSubmit={handleUpdateProfile}
                 className="space-y-5 sm:space-y-6"
               >
-                <div className="flex items-center gap-3 mb-4 sm:mb-6">
-                  <Settings
-                    className={`w-5 h-5 sm:w-6 sm:h-6 ${
-                      darkMode ? "text-blue-400" : "text-blue-600"
-                    }`}
-                  />
-                  <h2
-                    className={`text-lg sm:text-xl font-bold ${
-                      darkMode ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    Update Your Profile
-                  </h2>
-                </div>
+                <h2
+                  className={`text-lg sm:text-xl font-bold mb-4 sm:mb-6 ${
+                    darkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  Update Your Profile
+                </h2>
 
                 {/* Success/Error Messages */}
                 {profileSuccess && (
@@ -428,26 +420,19 @@ const ProfileSettings = () => {
               </form>
             )}
 
-            {/* Password Tab */}
+            {/* Password Settings */}
             {activeTab === "password" && (
               <form
                 onSubmit={handleChangePassword}
                 className="space-y-5 sm:space-y-6"
               >
-                <div className="flex items-center gap-3 mb-4 sm:mb-6">
-                  <Lock
-                    className={`w-5 h-5 sm:w-6 sm:h-6 ${
-                      darkMode ? "text-blue-400" : "text-blue-600"
-                    }`}
-                  />
-                  <h2
-                    className={`text-lg sm:text-xl font-bold ${
-                      darkMode ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    Change Your Password
-                  </h2>
-                </div>
+                <h2
+                  className={`text-lg sm:text-xl font-bold mb-4 sm:mb-6 ${
+                    darkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  Change Your Password
+                </h2>
 
                 {/* Success/Error Messages */}
                 {passwordSuccess && (

@@ -8,11 +8,9 @@ import {
   Presentation,
   FolderOpen,
   BookMarked,
-  TrendingUp,
-  Target,
-  Clock,
   ChevronRight,
   Sparkles,
+  Home,
 } from "lucide-react";
 import { useTheme } from "../ThemeContext";
 import ChatPanel from "../chat/ChatPanel";
@@ -82,41 +80,6 @@ const ResourceCard = ({ icon, title, count, color, darkMode, onClick }) => {
   );
 };
 
-// Stat Card Component
-const StatCard = ({ icon, label, value, color, darkMode }) => {
-  return (
-    <div
-      className={`p-5 rounded-xl border transition-all hover:scale-[1.02] ${
-        darkMode
-          ? "bg-gray-800/50 border-gray-700/50 hover:bg-gray-800"
-          : "bg-white border-gray-200 hover:shadow-lg"
-      }`}
-    >
-      <div className="flex items-center gap-4">
-        <div className={`p-3 rounded-xl bg-gradient-to-br ${color}`}>
-          {React.cloneElement(icon, { className: "w-6 h-6 text-white" })}
-        </div>
-        <div>
-          <p
-            className={`text-2xl font-bold ${
-              darkMode ? "text-white" : "text-gray-900"
-            }`}
-          >
-            {value}
-          </p>
-          <p
-            className={`text-sm ${
-              darkMode ? "text-gray-400" : "text-gray-600"
-            }`}
-          >
-            {label}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // Dashboard Component
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -127,7 +90,9 @@ const Dashboard = () => {
     department: null,
     semester: null,
   });
+  const [resourceCounts, setResourceCounts] = useState({});
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const savedData = localStorage.getItem("dashboardData");
@@ -145,10 +110,47 @@ const Dashboard = () => {
     }
   }, [location.state]);
 
-  const { department, semester } = dashboardData;
+  // Fetch real resource counts from API
+  useEffect(() => {
+    const fetchResourceCounts = async () => {
+      if (!dashboardData.department || !dashboardData.semester) {
+        setLoading(false);
+        return;
+      }
 
-  const handleBack = () => {
-    navigate("/select-semester", { state: { department } });
+      try {
+        setLoading(true);
+        const API_URL =
+          import.meta.env.VITE_API_URL ||
+          "https://unibro-production.up.railway.app";
+
+        const response = await fetch(
+          `${API_URL}/api/resources/counts?department=${encodeURIComponent(
+            dashboardData.department.name
+          )}&semester=${dashboardData.semester}`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setResourceCounts(data.counts || {});
+        } else {
+          console.error("Failed to fetch resource counts");
+          // Set default counts if API fails
+          setResourceCounts({});
+        }
+      } catch (error) {
+        console.error("Error fetching resource counts:", error);
+        setResourceCounts({});
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResourceCounts();
+  }, [dashboardData.department, dashboardData.semester]);
+
+  const handleBackToHome = () => {
+    navigate("/");
   };
 
   const handleStartOver = () => {
@@ -160,8 +162,8 @@ const Dashboard = () => {
     navigate("/resource-details", {
       state: {
         resourceType,
-        department: department,
-        semester: semester,
+        department: dashboardData.department,
+        semester: dashboardData.semester,
       },
     });
   };
@@ -174,44 +176,53 @@ const Dashboard = () => {
     setIsChatOpen(false);
   };
 
+  const { department, semester } = dashboardData;
+
+  // Resource types with real counts from API
   const resources = [
     {
       icon: <ClipboardList />,
       title: "Assignments",
-      count: 12,
+      count: resourceCounts.Assignments || 0,
       color: "from-blue-500 to-cyan-500",
     },
     {
       icon: <FileText />,
       title: "Quizzes",
-      count: 8,
+      count: resourceCounts.Quizzes || 0,
       color: "from-purple-500 to-pink-500",
     },
     {
       icon: <Presentation />,
       title: "Presentations",
-      count: 5,
+      count: resourceCounts.Presentations || 0,
       color: "from-orange-500 to-red-500",
     },
     {
       icon: <FolderOpen />,
       title: "Projects",
-      count: 3,
+      count: resourceCounts.Projects || 0,
       color: "from-green-500 to-emerald-500",
     },
     {
       icon: <BookOpen />,
       title: "Notes",
-      count: 45,
+      count: resourceCounts.Notes || 0,
       color: "from-indigo-500 to-purple-500",
     },
     {
       icon: <BookMarked />,
       title: "Past Papers",
-      count: 15,
+      count: resourceCounts["Past Papers"] || 0,
       color: "from-pink-500 to-rose-500",
     },
   ];
+
+  // Calculate total resources
+  const totalResources = resources.reduce(
+    (acc, resource) => acc + resource.count,
+    0
+  );
 
   return (
     <div
@@ -238,16 +249,15 @@ const Dashboard = () => {
         {/* Premium Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 sm:mb-10">
           <button
-            onClick={handleBack}
+            onClick={handleBackToHome}
             className={`group flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all ${
               darkMode
                 ? "text-gray-300 hover:text-white hover:bg-gray-800 border border-gray-800"
                 : "text-gray-700 hover:text-gray-900 hover:bg-white border border-gray-200 shadow-sm hover:shadow"
             }`}
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="hidden xs:inline">Back to Semester</span>
-            <span className="xs:hidden">Back</span>
+            <Home className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <span>Back to Home</span>
           </button>
 
           <button
@@ -272,7 +282,7 @@ const Dashboard = () => {
                     darkMode ? "text-white" : "text-gray-900"
                   }`}
                 >
-                  {department?.name}
+                  {department.name}
                 </h1>
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full text-sm font-semibold shadow-lg">
@@ -286,7 +296,9 @@ const Dashboard = () => {
                   darkMode ? "text-gray-400" : "text-gray-600"
                 }`}
               >
-                Welcome back! Here's your academic overview
+                {loading
+                  ? "Loading resources..."
+                  : `Explore ${totalResources} available resources for your semester`}
               </p>
             </div>
 
@@ -309,7 +321,7 @@ const Dashboard = () => {
                         : "bg-gray-100 text-gray-600"
                     }`}
                   >
-                    {resources.reduce((acc, r) => acc + r.count, 0)} total
+                    {loading ? "..." : `${totalResources} total`}
                   </span>
                 </div>
 
@@ -319,7 +331,7 @@ const Dashboard = () => {
                       key={index}
                       icon={resource.icon}
                       title={resource.title}
-                      count={resource.count}
+                      count={loading ? "..." : resource.count}
                       color={resource.color}
                       darkMode={darkMode}
                       onClick={() => handleResourceClick(resource.title)}

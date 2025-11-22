@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-// Get auth token
+// Get auth token from localStorage
 const getAuthToken = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   return user?.token;
@@ -25,7 +25,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ✅ FIXED: Get messages for a room (consistent parameters)
+// Get messages for a room
 export const getRoomMessages = async (
   department,
   semester,
@@ -37,10 +37,6 @@ export const getRoomMessages = async (
       department
     )}/${semester}?limit=${limit}`;
 
-    // Note: Backend uses 'before' parameter, not 'page'
-    // If you need pagination, modify backend to support page numbers
-    // For now, we'll just load the last N messages
-
     const response = await api.get(url);
     return response.data;
   } catch (error) {
@@ -49,7 +45,7 @@ export const getRoomMessages = async (
   }
 };
 
-// Send a message (via REST API as backup)
+// Send a message via REST API
 export const sendMessage = async (
   department,
   semester,
@@ -81,7 +77,7 @@ export const deleteMessage = async (messageId) => {
   }
 };
 
-// Get unread count
+// Get unread message count
 export const getUnreadCount = async (department, semester) => {
   try {
     const response = await api.get(
@@ -94,7 +90,7 @@ export const getUnreadCount = async (department, semester) => {
   }
 };
 
-// Mark as read
+// Mark messages as read
 export const markAsRead = async (department, semester) => {
   try {
     const response = await api.put(
@@ -107,7 +103,7 @@ export const markAsRead = async (department, semester) => {
   }
 };
 
-// Get active users
+// Get active users in room
 export const getActiveUsers = async (department, semester) => {
   try {
     const response = await api.get(

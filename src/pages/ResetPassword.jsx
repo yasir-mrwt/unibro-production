@@ -342,7 +342,7 @@ const ResetPassword = () => {
           </button>
         </form>
 
-        {/* Back to Login */}
+        {/* Back to Home */}
         <div className="mt-6 text-center">
           <button
             onClick={() => navigate("/")}

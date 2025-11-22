@@ -8,13 +8,12 @@ const AuthSuccess = ({ onLoginSuccess }) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { darkMode } = useTheme();
-  const [status, setStatus] = useState("loading"); // loading, success, error
+  const [status, setStatus] = useState("loading");
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const handleGoogleAuth = async () => {
       try {
-        // ✅ FIXED: Get token from URL query parameter
         const token = searchParams.get("token");
 
         if (!token) {
@@ -24,10 +23,10 @@ const AuthSuccess = ({ onLoginSuccess }) => {
           return;
         }
 
-        // ✅ Store token immediately
+        // Store token immediately
         localStorage.setItem("token", token);
 
-        // ✅ Fetch user data with the token
+        // Fetch user data with token
         const response = await fetch(
           import.meta.env.VITE_API_URL + "/api/auth/me",
           {
@@ -47,7 +46,6 @@ const AuthSuccess = ({ onLoginSuccess }) => {
         }
 
         if (data.success && data.user) {
-          // ✅ Store complete auth data
           const userWithToken = {
             ...data.user,
             token: token,
@@ -55,12 +53,12 @@ const AuthSuccess = ({ onLoginSuccess }) => {
 
           storeAuthData(userWithToken);
 
-          // ✅ Call the parent success handler
+          // Call parent success handler
           if (onLoginSuccess) {
             onLoginSuccess(userWithToken);
           }
 
-          // ✅ Dispatch events to update UI
+          // Update UI with events
           window.dispatchEvent(
             new CustomEvent("userLoggedIn", {
               detail: userWithToken,
@@ -70,7 +68,7 @@ const AuthSuccess = ({ onLoginSuccess }) => {
 
           setStatus("success");
 
-          // ✅ Redirect to home page after 1.5 seconds
+          // Redirect to home after success
           setTimeout(() => {
             navigate("/", { replace: true });
           }, 1500);
@@ -78,15 +76,15 @@ const AuthSuccess = ({ onLoginSuccess }) => {
           throw new Error("Invalid response format");
         }
       } catch (error) {
-        console.error("❌ Google auth error:", error);
+        console.error("Google auth error:", error);
         setStatus("error");
         setErrorMessage(error.message || "Authentication failed");
 
-        // ✅ Clear any stored token on error
+        // Clear stored data on error
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
-        // ✅ Redirect to home after 3 seconds
+        // Redirect to home after error
         setTimeout(() => {
           navigate("/", { replace: true });
         }, 3000);
