@@ -1,0 +1,21 @@
+/* AnnouncementBanner.css - Only animation keyframes */
+
+/* Scrolling animation */
+.scroll-animation {
+  animation: scroll-left 30s linear infinite;
+}
+
+/* Pause on hover */
+.scroll-animation:hover {
+  animation-play-state: paused;
+}
+
+/* Keyframes for smooth scrolling */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
