@@ -18,7 +18,7 @@ import AnnouncementBanner from "./components/AnnouncementBanner";
 // Import authentication pages
 import VerifyEmail from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
-import ProfileSettings from "./pages/profileSettings";
+import ProfileSettings from "./pages/ProfileSettings";
 import MyPosts from "./pages/MyPosts";
 import AdminDashboard from "./pages/AdminDashboard";
 
