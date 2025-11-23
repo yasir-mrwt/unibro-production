@@ -51,7 +51,10 @@ const FeaturesSection = () => {
         "Access thousands of verified resources, notes, assignments, and past papers organized by department and semester",
       gradient: "from-blue-500 via-blue-600 to-cyan-500",
       bgGradient: "from-blue-500/5 to-cyan-500/5",
-      onClick: () => navigate("/select-department"),
+      onClick: () => {
+        navigate("/select-department");
+        window.scrollTo(0, 0);
+      },
       stats: { count: "10,000+", label: "Resources" },
     },
     {
@@ -61,7 +64,10 @@ const FeaturesSection = () => {
         "Connect with expert faculty members, view their profiles, office hours, and schedule consultations",
       gradient: "from-purple-500 via-purple-600 to-pink-500",
       bgGradient: "from-purple-500/5 to-pink-500/5",
-      onClick: () => navigate("/staff"),
+      onClick: () => {
+        navigate("/staff");
+        window.scrollTo(0, 0);
+      },
       stats: { count: "200+", label: "Faculty" },
     },
     {
@@ -71,7 +77,10 @@ const FeaturesSection = () => {
         "Collaborate in real-time with your classmates through department and semester-specific chat rooms",
       gradient: "from-green-500 via-emerald-600 to-teal-500",
       bgGradient: "from-green-500/5 to-teal-500/5",
-      onClick: () => navigate("/select-department"),
+      onClick: () => {
+        navigate("/select-department");
+        window.scrollTo(0, 0);
+      },
       stats: { count: "50,000+", label: "Messages" },
     },
   ];

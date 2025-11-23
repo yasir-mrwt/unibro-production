@@ -58,13 +58,13 @@ const CTASection = () => {
     {
       text: "The real-time chat feature helped me collaborate better with my classmates.",
       author: "Ali Khan",
-      role: "Business Administration, Semester 4",
-      avatar: "💼",
+      role: "Electrical Engineering, Semester 4",
+      avatar: "⚡",
     },
     {
       text: "Finding past papers and study materials has never been easier.",
       author: "Fatima Malik",
-      role: "Engineering, Semester 8",
+      role: "Industrial Engineering, Semester 8",
       avatar: "⚙️",
     },
   ];
@@ -252,31 +252,15 @@ const CTASection = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              {isAuthenticated ? (
-                <button
-                  onClick={() => navigate("/select-department")}
-                  className="group px-8 py-5 bg-white text-gray-900 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-white/50 hover:scale-105 transition-all duration-300 flex items-center gap-2"
-                >
-                  Start Learning Now
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
-              ) : (
-                <button
-                  onClick={() =>
-                    document.getElementById("auth-modal-trigger")?.click()
-                  }
-                  className="group px-8 py-5 bg-white text-gray-900 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-white/50 hover:scale-105 transition-all duration-300 flex items-center gap-2"
-                >
-                  Create Free Account
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
-              )}
-
               <button
-                onClick={() => navigate("/about")}
-                className="px-8 py-5 bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 rounded-2xl font-bold text-lg hover:bg-white/20 hover:scale-105 transition-all duration-300"
+                onClick={() => {
+                  navigate("/about");
+                  window.scrollTo(0, 0);
+                }}
+                className="group px-8 py-5 bg-white text-gray-900 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-white/50 hover:scale-105 transition-all duration-300 flex items-center gap-2"
               >
-                Learn More
+                Learn more
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
 
