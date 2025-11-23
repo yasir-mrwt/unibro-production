@@ -9,7 +9,6 @@ const AuthError = () => {
   const [countdown, setCountdown] = useState(5);
 
   useEffect(() => {
-    // Countdown timer
     if (countdown > 0) {
       const timer = setTimeout(() => {
         setCountdown(countdown - 1);
@@ -25,68 +24,82 @@ const AuthError = () => {
   };
 
   const handleRetryGoogle = () => {
-    window.location.href = "http://localhost:5001/api/auth/google";
+    window.location.href = import.meta.env.VITE_API_URL + "/api/auth/google";
   };
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center pt-20 p-4 ${
-        darkMode
-          ? "bg-gradient-to-br from-gray-900 to-gray-800"
-          : "bg-gradient-to-br from-red-50 to-orange-50"
+      className={`min-h-screen flex items-center justify-center ${
+        darkMode ? "bg-gray-950" : "bg-gray-50"
       }`}
     >
-      <div
-        className={`text-center p-8 rounded-2xl shadow-xl max-w-md w-full ${
-          darkMode ? "bg-gray-800" : "bg-white"
-        }`}
-      >
-        <div className="w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
-          <XCircle className="w-10 h-10 text-red-600 dark:text-red-400" />
+      <div className="w-full max-w-md px-6 text-center space-y-8">
+        {/* Clean Error Icon */}
+        <div className="flex justify-center">
+          <div
+            className={`w-16 h-16 rounded-full flex items-center justify-center ${
+              darkMode ? "bg-red-500/10" : "bg-red-50"
+            }`}
+          >
+            <XCircle
+              className={`w-10 h-10 ${
+                darkMode ? "text-red-500" : "text-red-600"
+              }`}
+            />
+          </div>
         </div>
 
-        <h2
-          className={`text-2xl font-bold mb-2 ${
-            darkMode ? "text-white" : "text-gray-900"
-          }`}
-        >
-          Authentication Failed
-        </h2>
+        {/* Error Message */}
+        <div className="space-y-3">
+          <h1
+            className={`text-2xl font-semibold ${
+              darkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            Authentication failed
+          </h1>
+          <p
+            className={`text-sm ${
+              darkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
+            We couldn't sign you in with Google. Please try again.
+          </p>
+        </div>
 
-        <p className={`mb-6 ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
-          There was a problem signing in with Google. Please try again.
-        </p>
-
+        {/* Action Buttons */}
         <div className="space-y-3">
           <button
             onClick={handleRetryGoogle}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+            className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${
+              darkMode
+                ? "bg-white text-gray-900 hover:bg-gray-100"
+                : "bg-gray-900 text-white hover:bg-gray-800"
+            }`}
           >
             <RefreshCw className="w-4 h-4" />
-            Try Again with Google
+            Try again
           </button>
 
           <button
             onClick={handleGoHome}
-            className={`w-full flex items-center justify-center gap-2 px-6 py-3 font-medium rounded-lg transition-all duration-200 ${
+            className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${
               darkMode
-                ? "bg-gray-700 hover:bg-gray-600 text-white"
-                : "bg-gray-200 hover:bg-gray-300 text-gray-900"
+                ? "bg-gray-800 text-white hover:bg-gray-700"
+                : "bg-white text-gray-900 hover:bg-gray-50 border border-gray-200"
             }`}
           >
             <Home className="w-4 h-4" />
-            Back to Home
+            Return home
           </button>
-
-          <p
-            className={`text-xs pt-2 ${
-              darkMode ? "text-gray-500" : "text-gray-500"
-            }`}
-          >
-            Auto-redirecting in {countdown} second{countdown !== 1 ? "s" : ""}
-            ...
-          </p>
         </div>
+
+        {/* Countdown */}
+        <p
+          className={`text-xs ${darkMode ? "text-gray-500" : "text-gray-500"}`}
+        >
+          Redirecting in {countdown} second{countdown !== 1 ? "s" : ""}
+        </p>
       </div>
     </div>
   );

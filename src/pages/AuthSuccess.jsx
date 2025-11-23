@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Loader, CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useTheme } from "../components/ThemeContext";
 import { storeAuthData } from "../services/authService";
 
@@ -23,10 +23,8 @@ const AuthSuccess = ({ onLoginSuccess }) => {
           return;
         }
 
-        // Store token immediately
         localStorage.setItem("token", token);
 
-        // Fetch user data with token
         const response = await fetch(
           import.meta.env.VITE_API_URL + "/api/auth/me",
           {
@@ -53,12 +51,10 @@ const AuthSuccess = ({ onLoginSuccess }) => {
 
           storeAuthData(userWithToken);
 
-          // Call parent success handler
           if (onLoginSuccess) {
             onLoginSuccess(userWithToken);
           }
 
-          // Update UI with events
           window.dispatchEvent(
             new CustomEvent("userLoggedIn", {
               detail: userWithToken,
@@ -68,7 +64,6 @@ const AuthSuccess = ({ onLoginSuccess }) => {
 
           setStatus("success");
 
-          // Redirect to home after success
           setTimeout(() => {
             navigate("/", { replace: true });
           }, 1500);
@@ -80,11 +75,9 @@ const AuthSuccess = ({ onLoginSuccess }) => {
         setStatus("error");
         setErrorMessage(error.message || "Authentication failed");
 
-        // Clear stored data on error
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
-        // Redirect to home after error
         setTimeout(() => {
           navigate("/", { replace: true });
         }, 3000);
@@ -96,81 +89,121 @@ const AuthSuccess = ({ onLoginSuccess }) => {
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center pt-20 ${
-        darkMode
-          ? "bg-gradient-to-br from-gray-900 to-gray-800"
-          : "bg-gradient-to-br from-blue-50 to-purple-50"
+      className={`min-h-screen flex items-center justify-center ${
+        darkMode ? "bg-gray-950" : "bg-gray-50"
       }`}
     >
-      <div
-        className={`text-center p-8 rounded-2xl shadow-xl max-w-md w-full mx-4 ${
-          darkMode ? "bg-gray-800" : "bg-white"
-        }`}
-      >
+      <div className="w-full max-w-md px-6 text-center">
+        {/* Loading State */}
         {status === "loading" && (
-          <>
-            <Loader className="w-16 h-16 text-blue-600 animate-spin mx-auto mb-4" />
-            <h2
-              className={`text-2xl font-bold mb-2 ${
-                darkMode ? "text-white" : "text-gray-900"
-              }`}
-            >
-              Completing Sign In...
-            </h2>
-            <p className={darkMode ? "text-gray-400" : "text-gray-600"}>
-              Please wait while we log you in with Google
-            </p>
-          </>
+          <div className="space-y-8">
+            {/* Simple Clean Spinner */}
+            <div className="flex justify-center">
+              <Loader2
+                className={`w-12 h-12 animate-spin ${
+                  darkMode ? "text-blue-500" : "text-blue-600"
+                }`}
+              />
+            </div>
+
+            <div className="space-y-3">
+              <h1
+                className={`text-2xl font-semibold ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                Authenticating
+              </h1>
+              <p
+                className={`text-sm ${
+                  darkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                Please wait while we verify your credentials
+              </p>
+            </div>
+          </div>
         )}
 
+        {/* Success State */}
         {status === "success" && (
-          <>
-            <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4 animate-bounce">
-              <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
+          <div className="space-y-8">
+            {/* Clean Success Icon */}
+            <div className="flex justify-center">
+              <div
+                className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                  darkMode ? "bg-green-500/10" : "bg-green-50"
+                }`}
+              >
+                <CheckCircle
+                  className={`w-10 h-10 ${
+                    darkMode ? "text-green-500" : "text-green-600"
+                  }`}
+                />
+              </div>
             </div>
-            <h2
-              className={`text-2xl font-bold mb-2 ${
-                darkMode ? "text-white" : "text-gray-900"
-              }`}
-            >
-              Welcome to Unibro! 🎉
-            </h2>
-            <p className={darkMode ? "text-gray-400" : "text-gray-600"}>
-              Successfully signed in with Google
-            </p>
-            <p
-              className={`text-sm mt-2 ${
-                darkMode ? "text-gray-500" : "text-gray-500"
-              }`}
-            >
-              Redirecting you to home page...
-            </p>
-          </>
+
+            <div className="space-y-3">
+              <h1
+                className={`text-2xl font-semibold ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                Sign in successful
+              </h1>
+              <p
+                className={`text-sm ${
+                  darkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                Welcome back! Redirecting you now...
+              </p>
+            </div>
+          </div>
         )}
 
+        {/* Error State */}
         {status === "error" && (
-          <>
-            <div className="w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
-              <XCircle className="w-10 h-10 text-red-600 dark:text-red-400" />
+          <div className="space-y-8">
+            {/* Clean Error Icon */}
+            <div className="flex justify-center">
+              <div
+                className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                  darkMode ? "bg-red-500/10" : "bg-red-50"
+                }`}
+              >
+                <XCircle
+                  className={`w-10 h-10 ${
+                    darkMode ? "text-red-500" : "text-red-600"
+                  }`}
+                />
+              </div>
             </div>
-            <h2
-              className={`text-2xl font-bold mb-2 ${
-                darkMode ? "text-white" : "text-gray-900"
-              }`}
-            >
-              Authentication Failed
-            </h2>
-            <p className={darkMode ? "text-gray-400" : "text-gray-600"}>
-              {errorMessage || "Something went wrong during sign in"}
-            </p>
-            <p
-              className={`text-sm mt-2 ${
-                darkMode ? "text-gray-500" : "text-gray-500"
-              }`}
-            >
-              Redirecting to home...
-            </p>
-          </>
+
+            <div className="space-y-3">
+              <h1
+                className={`text-2xl font-semibold ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
+              >
+                Authentication failed
+              </h1>
+              <p
+                className={`text-sm ${
+                  darkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                {errorMessage || "Unable to complete sign in"}
+              </p>
+              <p
+                className={`text-xs ${
+                  darkMode ? "text-gray-500" : "text-gray-500"
+                }`}
+              >
+                Returning to home page...
+              </p>
+            </div>
+          </div>
         )}
       </div>
     </div>
