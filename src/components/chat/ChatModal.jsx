@@ -210,6 +210,12 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
 
   const handleClearReply = () => setReplyingTo(null);
 
+  // Function to truncate long reply messages (like WhatsApp)
+  const truncateReplyMessage = (text, maxLength = 80) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
+  };
+
   if (!isOpen) return null;
 
   if (!user) {
@@ -362,48 +368,51 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
         )}
       </div>
 
-      {/* Reply indicator - ALWAYS VISIBLE */}
+      {/* Reply indicator - IMPROVED for long messages */}
       {replyingTo && (
         <div
-          className={`px-4 py-2 border-t flex items-center justify-between ${
+          className={`px-3 py-2 border-t ${
             darkMode
               ? "bg-gray-800 border-gray-700"
               : "bg-gray-100 border-gray-200"
           }`}
         >
-          <div className="flex items-center space-x-2 flex-1">
-            <Reply
-              className={`w-4 h-4 ${
-                darkMode ? "text-blue-400" : "text-blue-600"
-              }`}
-            />
-            <div className="flex-1">
-              <p
-                className={`text-xs font-semibold ${
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start gap-2 flex-1 min-w-0">
+              <Reply
+                className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
                   darkMode ? "text-blue-400" : "text-blue-600"
                 }`}
-              >
-                Replying to {replyingTo.userName}
-              </p>
-              <p
-                className={`text-xs truncate ${
-                  darkMode ? "text-gray-400" : "text-gray-600"
-                }`}
-              >
-                {replyingTo.message}
-              </p>
+              />
+              <div className="flex-1 min-w-0">
+                <p
+                  className={`text-xs font-semibold truncate ${
+                    darkMode ? "text-blue-400" : "text-blue-600"
+                  }`}
+                >
+                  Replying to {replyingTo.userName}
+                </p>
+                <p
+                  className={`text-xs break-words line-clamp-2 ${
+                    darkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                  title={replyingTo.message} // Show full message on hover
+                >
+                  {truncateReplyMessage(replyingTo.message)}
+                </p>
+              </div>
             </div>
+            <button
+              onClick={handleClearReply}
+              className={`p-1 rounded-lg flex-shrink-0 ${
+                darkMode
+                  ? "hover:bg-gray-700 text-gray-400"
+                  : "hover:bg-gray-200 text-gray-600"
+              }`}
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <button
-            onClick={handleClearReply}
-            className={`p-1 rounded-lg ${
-              darkMode
-                ? "hover:bg-gray-700 text-gray-400"
-                : "hover:bg-gray-200 text-gray-600"
-            }`}
-          >
-            <X className="w-4 h-4" />
-          </button>
         </div>
       )}
 
