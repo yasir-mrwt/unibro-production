@@ -33,15 +33,13 @@ const AddEditStaffModal = ({ staff, onClose, onSuccess, darkMode }) => {
 
   const departments = [
     "Computer Science",
-    "Business Administration",
-    "Engineering",
-    "Mathematics",
-    "Physics",
-    "Chemistry",
-    "English",
-    "Economics",
-    "Law",
-    "Medicine",
+    "Electrical Engineering",
+    "Mechanical Engineering",
+    "Industrial Engineering",
+    "Mechatronics Engineering",
+    "Agricultural Engineering",
+    "Chemical Engineering",
+    "Civil Engineering",
   ];
 
   useEffect(() => {
