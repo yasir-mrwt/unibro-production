@@ -32,7 +32,6 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
   const user = getStoredUser();
   const isVerified = user?.isVerified || false;
 
-  // Prevent body scroll when modal is open
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "unset";
     return () => {
@@ -40,7 +39,6 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
     };
   }, [isOpen]);
 
-  // Setup socket listeners ONCE when modal is first opened
   useEffect(() => {
     if (!isOpen || !user || listenersSetupRef.current) return;
 
@@ -90,7 +88,6 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
     });
   }, [isOpen, user]);
 
-  // Load messages and join room when opened
   useEffect(() => {
     if (!isOpen || !user || !department || !semester) return;
 
@@ -210,12 +207,6 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
 
   const handleClearReply = () => setReplyingTo(null);
 
-  // Function to truncate long reply messages (like WhatsApp)
-  const truncateReplyMessage = (text, maxLength = 80) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + "...";
-  };
-
   if (!isOpen) return null;
 
   if (!user) {
@@ -232,9 +223,9 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
         darkMode ? "bg-gray-900" : "bg-gray-50"
       }`}
     >
-      {/* Header - ALWAYS VISIBLE */}
+      {/* Header */}
       <div
-        className={`flex items-center justify-between px-4 py-4 border-b ${
+        className={`flex items-center justify-between px-4 py-3 border-b ${
           darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
         }`}
       >
@@ -246,18 +237,18 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
               : "hover:bg-gray-200 text-gray-700"
           }`}
         >
-          <ArrowLeft className="w-6 h-6" />
+          <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1 text-center">
           <h2
-            className={`text-lg font-bold ${
+            className={`text-base font-semibold ${
               darkMode ? "text-white" : "text-gray-900"
             }`}
           >
-            Group Chat
+            {department?.name || department}
           </h2>
           <p
-            className={`text-xs flex items-center justify-center space-x-1 ${
+            className={`text-xs flex items-center justify-center gap-1 ${
               darkMode ? "text-gray-400" : "text-gray-600"
             }`}
           >
@@ -265,25 +256,10 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
             <span>{activeUsers} online</span>
           </p>
         </div>
-        <div className="w-10" />
+        <div className="w-9" />
       </div>
 
-      {/* Department Info - ALWAYS VISIBLE */}
-      <div
-        className={`px-4 py-2 text-center border-b ${
-          darkMode
-            ? "bg-gray-800/50 border-gray-700"
-            : "bg-gray-100 border-gray-200"
-        }`}
-      >
-        <p
-          className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}
-        >
-          {department?.name || department} • Semester {semester}
-        </p>
-      </div>
-
-      {/* Messages Area - BLURRED when not verified */}
+      {/* Messages Area */}
       <div
         ref={messagesContainerRef}
         className={`flex-1 overflow-y-auto p-4 scroll-smooth relative ${
@@ -294,12 +270,12 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
           <div className="absolute inset-0 flex flex-col items-center justify-center z-10 p-4">
             <div className="text-center max-w-sm">
               <ShieldAlert
-                className={`w-16 h-16 mx-auto mb-4 ${
+                className={`w-12 h-12 mx-auto mb-3 ${
                   darkMode ? "text-gray-500" : "text-gray-400"
                 }`}
               />
               <h3
-                className={`text-lg font-bold mb-2 ${
+                className={`text-base font-semibold mb-2 ${
                   darkMode ? "text-white" : "text-gray-900"
                 }`}
               >
@@ -310,8 +286,7 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
                   darkMode ? "text-gray-400" : "text-gray-600"
                 }`}
               >
-                Please verify your email address to access the group chat and
-                connect with your classmates.
+                Please verify your email to access chat
               </p>
             </div>
           </div>
@@ -341,12 +316,12 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
         ) : (
           <div className="flex flex-col items-center justify-center h-full">
             <MessageCircle
-              className={`w-16 h-16 mb-4 ${
+              className={`w-12 h-12 mb-3 ${
                 darkMode ? "text-gray-600" : "text-gray-400"
               }`}
             />
             <p
-              className={`text-center ${
+              className={`text-center text-sm ${
                 darkMode ? "text-gray-400" : "text-gray-600"
               }`}
             >
@@ -368,43 +343,41 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
         )}
       </div>
 
-      {/* Reply indicator - IMPROVED for long messages */}
+      {/* ✅ FIXED: WhatsApp-style Reply Bar with proper truncation */}
       {replyingTo && (
         <div
           className={`px-3 py-2 border-t ${
             darkMode
-              ? "bg-gray-800 border-gray-700"
-              : "bg-gray-100 border-gray-200"
+              ? "bg-gray-800/95 border-gray-700"
+              : "bg-gray-50 border-gray-200"
           }`}
         >
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-start gap-2 flex-1 min-w-0">
-              <Reply
-                className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
+          <div className="flex items-start gap-2">
+            {/* Vertical accent line - WhatsApp style */}
+            <div className="w-1 h-10 bg-blue-500 rounded-full flex-shrink-0"></div>
+
+            {/* Reply content */}
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <p
+                className={`text-xs font-medium mb-0.5 ${
                   darkMode ? "text-blue-400" : "text-blue-600"
                 }`}
-              />
-              <div className="flex-1 min-w-0">
-                <p
-                  className={`text-xs font-semibold truncate ${
-                    darkMode ? "text-blue-400" : "text-blue-600"
-                  }`}
-                >
-                  Replying to {replyingTo.userName}
-                </p>
-                <p
-                  className={`text-xs break-words line-clamp-2 ${
-                    darkMode ? "text-gray-400" : "text-gray-600"
-                  }`}
-                  title={replyingTo.message} // Show full message on hover
-                >
-                  {truncateReplyMessage(replyingTo.message)}
-                </p>
-              </div>
+              >
+                {replyingTo.userName}
+              </p>
+              <p
+                className={`text-xs line-clamp-1 ${
+                  darkMode ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                {replyingTo.message}
+              </p>
             </div>
+
+            {/* Close button */}
             <button
               onClick={handleClearReply}
-              className={`p-1 rounded-lg flex-shrink-0 ${
+              className={`p-1.5 rounded-full flex-shrink-0 ${
                 darkMode
                   ? "hover:bg-gray-700 text-gray-400"
                   : "hover:bg-gray-200 text-gray-600"
@@ -416,13 +389,13 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
         </div>
       )}
 
-      {/* Input Area - ALWAYS VISIBLE but shows overlay when clicked if not verified */}
+      {/* Input Area */}
       <div
-        className={`p-4 border-t ${
+        className={`p-3 border-t ${
           darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
         }`}
       >
-        <div className="flex space-x-2">
+        <div className="flex gap-2">
           <input
             type="text"
             value={message}
@@ -431,54 +404,60 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
             onKeyPress={handleKeyPress}
             placeholder={
               replyingTo
-                ? `Replying to ${replyingTo.userName}...`
+                ? `Reply to ${replyingTo.userName}...`
                 : isVerified
-                ? "Type a message..."
-                : "Verify email to chat..."
+                ? "Message"
+                : "Verify email to chat"
             }
             disabled={sending}
-            className={`flex-1 px-4 py-3 rounded-xl outline-none ${
+            className={`flex-1 px-4 py-2.5 rounded-full outline-none text-sm ${
               darkMode
                 ? "bg-gray-750 text-white placeholder-gray-500"
                 : "bg-gray-100 text-gray-900 placeholder-gray-500"
             } disabled:opacity-50 ${
-              !isVerified
-                ? "cursor-pointer border-2 border-dashed border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20"
-                : ""
+              !isVerified ? "cursor-pointer border border-yellow-500/50" : ""
             }`}
           />
           <button
             onClick={handleSend}
             disabled={!message.trim() || sending || !isVerified}
-            className={`p-3 rounded-xl transition-all ${
-              isVerified
-                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg"
-                : "bg-gray-400 text-gray-200 cursor-not-allowed"
+            className={`p-2.5 rounded-full transition-all flex-shrink-0 ${
+              message.trim() && isVerified
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
             } disabled:opacity-50`}
           >
             {sending ? (
-              <Loader className="w-6 h-6 animate-spin" />
+              <Loader className="w-5 h-5 animate-spin" />
             ) : (
-              <Send className="w-6 h-6" />
+              <Send className="w-5 h-5" />
             )}
           </button>
         </div>
       </div>
 
-      {/* Verification Modal Overlay - Shows when user tries to interact */}
+      {/* Verification Modal */}
       {showVerificationOverlay && (
-        <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/50">
+        <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div
-            className={`max-w-md w-full rounded-2xl p-8 text-center ${
+            className={`max-w-sm w-full rounded-2xl p-6 text-center ${
               darkMode ? "bg-gray-800" : "bg-white"
             }`}
           >
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center mx-auto mb-6">
-              <ShieldAlert className="w-10 h-10 text-white" />
+            <div
+              className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                darkMode ? "bg-yellow-500/10" : "bg-yellow-50"
+              }`}
+            >
+              <ShieldAlert
+                className={`w-8 h-8 ${
+                  darkMode ? "text-yellow-500" : "text-yellow-600"
+                }`}
+              />
             </div>
 
             <h3
-              className={`text-2xl font-bold mb-3 ${
+              className={`text-lg font-semibold mb-2 ${
                 darkMode ? "text-white" : "text-gray-900"
               }`}
             >
@@ -486,57 +465,55 @@ const ChatModal = ({ isOpen, onClose, department, semester, darkMode }) => {
             </h3>
 
             <p
-              className={`mb-6 ${darkMode ? "text-gray-400" : "text-gray-600"}`}
+              className={`text-sm mb-4 ${
+                darkMode ? "text-gray-400" : "text-gray-600"
+              }`}
             >
-              Please verify your email address to access the group chat and
-              connect with your classmates.
+              Check your inbox for a verification link
             </p>
 
             <div
-              className={`p-4 rounded-xl mb-6 ${
+              className={`p-3 rounded-xl mb-4 text-left ${
                 darkMode
-                  ? "bg-blue-900/20 border border-blue-800"
-                  : "bg-blue-50 border border-blue-200"
+                  ? "bg-blue-900/20 border border-blue-800/30"
+                  : "bg-blue-50 border border-blue-100"
               }`}
             >
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-2">
                 <Mail
-                  className={`w-5 h-5 mt-0.5 ${
+                  className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
                     darkMode ? "text-blue-400" : "text-blue-600"
                   }`}
                 />
-                <div className="text-left">
+                <div className="flex-1 min-w-0">
                   <p
-                    className={`text-sm font-medium mb-1 ${
+                    className={`text-xs font-medium mb-0.5 ${
                       darkMode ? "text-blue-400" : "text-blue-700"
                     }`}
                   >
-                    Check your inbox
+                    Sent to
                   </p>
                   <p
-                    className={`text-xs ${
+                    className={`text-xs truncate ${
                       darkMode ? "text-blue-300" : "text-blue-600"
                     }`}
                   >
-                    We sent a verification link to{" "}
-                    <span className="font-semibold">{user?.email}</span>
+                    {user?.email}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowVerificationOverlay(false)}
-                className={`flex-1 py-3 rounded-xl font-medium transition-all ${
-                  darkMode
-                    ? "bg-gray-700 text-white hover:bg-gray-600"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-              >
-                Got It
-              </button>
-            </div>
+            <button
+              onClick={() => setShowVerificationOverlay(false)}
+              className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                darkMode
+                  ? "bg-gray-700 text-white hover:bg-gray-600"
+                  : "bg-gray-900 text-white hover:bg-gray-800"
+              }`}
+            >
+              Got It
+            </button>
           </div>
         </div>
       )}

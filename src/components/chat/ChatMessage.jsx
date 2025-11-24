@@ -75,6 +75,13 @@ const ChatMessage = React.memo(({ message, darkMode, onDelete, onReply }) => {
     }
   };
 
+  // Function to truncate long reply messages
+  const truncateReplyMessage = (text, maxLength = 60) => {
+    if (!text) return "";
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
+  };
+
   if (!message || !message.message) {
     console.warn("Invalid message data:", message);
     return null;
@@ -102,24 +109,35 @@ const ChatMessage = React.memo(({ message, darkMode, onDelete, onReply }) => {
           </span>
         )}
 
-        {/* Reply indicator */}
+        {/* Reply indicator - IMPROVED STYLING */}
         {message.replyTo && (
           <div
-            className={`text-xs px-3 py-1 rounded-t-lg mb-1 border-l-2 ${
+            className={`max-w-full px-3 py-1.5 rounded-t-lg mb-1 border-l-2 ${
               darkMode
-                ? "bg-gray-700 border-blue-500 text-gray-400"
-                : "bg-gray-100 border-blue-500 text-gray-600"
+                ? "bg-gray-700 border-blue-500 text-gray-300"
+                : "bg-gray-100 border-blue-500 text-gray-700"
             }`}
           >
-            <span className="font-semibold">
-              Replying to: {message.replyTo.userName || "Unknown"}
-            </span>
-            <p className="truncate">{message.replyTo.message || ""}</p>
+            <div className="flex items-start gap-1">
+              <Reply
+                className={`w-3 h-3 mt-0.5 flex-shrink-0 ${
+                  darkMode ? "text-blue-400" : "text-blue-600"
+                }`}
+              />
+              <div className="flex-1 min-w-0">
+                <span className="text-xs font-semibold block">
+                  {message.replyTo.userName || "Unknown"}
+                </span>
+                <p className="text-xs truncate">
+                  {truncateReplyMessage(message.replyTo.message)}
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Message bubble */}
-        <div className="relative group">
+        <div className="relative group w-full">
           <div
             className={`px-4 py-2 rounded-2xl ${
               message.isDeleted
@@ -138,7 +156,7 @@ const ChatMessage = React.memo(({ message, darkMode, onDelete, onReply }) => {
             </p>
           </div>
 
-          {/* Action buttons - ✅ FIX: Only show if user is logged in and verified */}
+          {/* Action buttons - IMPROVED POSITIONING */}
           {showActions &&
             !message.isDeleted &&
             currentUser &&
@@ -146,16 +164,18 @@ const ChatMessage = React.memo(({ message, darkMode, onDelete, onReply }) => {
               <div
                 className={`absolute ${
                   isOwnMessage
-                    ? "left-0 -translate-x-full"
-                    : "right-0 translate-x-full"
-                } top-0 flex space-x-1 px-2`}
+                    ? "left-0 -translate-x-2 -ml-12"
+                    : "right-0 translate-x-2 -mr-12"
+                } top-1/2 -translate-y-1/2 flex space-x-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg p-1 border ${
+                  darkMode ? "border-gray-700" : "border-gray-200"
+                } shadow-lg`}
               >
                 <button
                   onClick={() => onReply && onReply(message)}
-                  className={`p-1.5 rounded-lg transition-all ${
+                  className={`p-1.5 rounded-md transition-all ${
                     darkMode
-                      ? "hover:bg-gray-700 text-gray-400 hover:text-blue-400"
-                      : "hover:bg-gray-200 text-gray-500 hover:text-blue-600"
+                      ? "hover:bg-gray-700 text-gray-300 hover:text-blue-400"
+                      : "hover:bg-gray-200 text-gray-600 hover:text-blue-600"
                   }`}
                   title="Reply"
                 >
@@ -164,10 +184,10 @@ const ChatMessage = React.memo(({ message, darkMode, onDelete, onReply }) => {
                 {isOwnMessage && (
                   <button
                     onClick={() => onDelete && onDelete(message._id)}
-                    className={`p-1.5 rounded-lg transition-all ${
+                    className={`p-1.5 rounded-md transition-all ${
                       darkMode
-                        ? "hover:bg-gray-700 text-gray-400 hover:text-red-400"
-                        : "hover:bg-gray-200 text-gray-500 hover:text-red-600"
+                        ? "hover:bg-gray-700 text-gray-300 hover:text-red-400"
+                        : "hover:bg-gray-200 text-gray-600 hover:text-red-600"
                     }`}
                     title="Delete"
                   >
@@ -192,4 +212,5 @@ const ChatMessage = React.memo(({ message, darkMode, onDelete, onReply }) => {
     </div>
   );
 });
+
 export default ChatMessage;
