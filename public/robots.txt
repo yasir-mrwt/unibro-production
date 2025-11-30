@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://unibro-production.vercel.app/sitemap.xml
+
+Sitemap: https://unibro-production.vercel.app/sitemap.xml?v=2
