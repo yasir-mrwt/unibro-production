@@ -8,29 +8,67 @@
     <priority>1.0</priority>
   </url>
   
+  <!-- Community & Feedback -->
   <url>
-    <loc>https://unibro-production.vercel.app/finance-form</loc>
+    <loc>https://unibro-production.vercel.app/submit</loc>
     <lastmod>2025-11-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  
+
   <url>
-    <loc>https://unibro-production.vercel.app/submit</loc>
+    <loc>https://unibro-production.vercel.app/community</loc>
+    <lastmod>2025-11-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- About Page -->
+  <url>
+    <loc>https://unibro-production.vercel.app/about</loc>
     <lastmod>2025-11-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
-  <!-- API Documentation/Info Pages (If you have any) -->
+  <!-- University/College Pages -->
   <url>
-    <loc>https://unibro-production.vercel.app/api-docs</loc>
+    <loc>https://unibro-production.vercel.app/resources</loc>
+    <lastmod>2025-11-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://unibro-production.vercel.app/select-department</loc>
     <lastmod>2025-11-30</lastmod>
     <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://unibro-production.vercel.app/select-semester</loc>
+    <lastmod>2025-11-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://unibro-production.vercel.app/staff</loc>
+    <lastmod>2025-11-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Chat Pages -->
+  <url>
+    <loc>https://unibro-production.vercel.app/chat</loc>
+    <lastmod>2025-11-30</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
 
-  <!-- Authentication Related Pages -->
+  <!-- Authentication Pages -->
   <url>
     <loc>https://unibro-production.vercel.app/login</loc>
     <lastmod>2025-11-30</lastmod>
@@ -45,38 +83,7 @@
     <priority>0.5</priority>
   </url>
 
-  <!-- Resource/Content Pages -->
-  <url>
-    <loc>https://unibro-production.vercel.app/resources</loc>
-    <lastmod>2025-11-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <!-- Chat/Community Pages -->
-  <url>
-    <loc>https://unibro-production.vercel.app/chat</loc>
-    <lastmod>2025-11-30</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-
-  <!-- Staff/Department Pages -->
-  <url>
-    <loc>https://unibro-production.vercel.app/staff</loc>
-    <lastmod>2025-11-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-
-  <url>
-    <loc>https://unibro-production.vercel.app/departments</loc>
-    <lastmod>2025-11-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-
-  <!-- User Profile Pages -->
+  <!-- User Profile -->
   <url>
     <loc>https://unibro-production.vercel.app/profile</loc>
     <lastmod>2025-11-30</lastmod>
